@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Document("SAFES")
+@Document(collection = "SAFES")
 public class Safe {
 
     @Id
