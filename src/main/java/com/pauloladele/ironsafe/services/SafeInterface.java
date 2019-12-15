@@ -10,7 +10,7 @@ public interface SafeInterface {
 
     Safe getSafe(String email);
 
-    boolean addCredentials(AddCredentialsRequest addCredentialsMessage);
+    boolean addCredentials(AddCredentialsRequest addCredentialsMessage, String email);
 
-    boolean removeCredentials(RemoveCredentialsRequest removeCredentialsMessage);
+    boolean removeCredentials(RemoveCredentialsRequest removeCredentialsMessage, String email);
 }
