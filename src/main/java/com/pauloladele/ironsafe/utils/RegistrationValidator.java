@@ -39,10 +39,10 @@ public class RegistrationValidator {
 
     private boolean checkEmptyFields(CreateUserRequest createUserRequest) {
         return (
-                createUserRequest.getPassword().length() == 0 ||
-                        createUserRequest.getConfirmPassword().length() == 0 ||
-                        createUserRequest.getEmail().length() == 0 ||
-                        createUserRequest.getConfirmEmail().length() == 0
+                createUserRequest.getPassword() == null ||
+                        createUserRequest.getConfirmPassword()  == null ||
+                        createUserRequest.getEmail() == null||
+                        createUserRequest.getConfirmEmail()  == null
         );
     }
 
