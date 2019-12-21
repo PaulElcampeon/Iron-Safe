@@ -7,4 +7,12 @@ public class AddCredentialsRequest {
 
     private String key;
     private String value;
+
+    public AddCredentialsRequest() {
+    }
+
+    public AddCredentialsRequest(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
 }

@@ -6,17 +6,20 @@ import com.pauloladele.ironsafe.dto.AddCredentialsRequest;
 import com.pauloladele.ironsafe.dto.RemoveCredentialsRequest;
 import com.pauloladele.ironsafe.models.Safe;
 import com.pauloladele.ironsafe.repositories.SafeRepository;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.pauloladele.ironsafe.utils.StringEncrypterDecrypter;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @SpringBootTest(classes = {IronSafeApplication.class, SecurityConfigurer.class}, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class SafeServiceIT {
 
@@ -26,24 +29,29 @@ public class SafeServiceIT {
     @Autowired
     private SafeService safeService;
 
-    @After
+    @Autowired
+    private StringEncrypterDecrypter encrypterDecrypter;
+
+    private final String email = "test@live.com";
+
+    private final String key = "testKey";
+
+    private final String value = "testValue";
+
+    @AfterEach
     public void tearDown() {
         repository.deleteAll();
     }
 
     @Test
-    public void createSafe() {
-        final String email = "danny@live.com";
-
+    public void createSafeSuccess() {
         safeService.createSafe(email);
 
         assertTrue(repository.existsById(email));
     }
 
     @Test
-    public void getSafe() {
-        final String email = "danny@live.com";
-
+    public void getSafeSuccess() {
         safeService.createSafe(email);
 
         final Safe safe = safeService.getSafe(email);
@@ -52,47 +60,43 @@ public class SafeServiceIT {
     }
 
     @Test
-    public void addCredentials() {
-        final String email = "danny@live.com";
-
+    public void addCredentialsSuccess() {
         safeService.createSafe(email);
 
-        AddCredentialsRequest addCredentialsRequest = new AddCredentialsRequest();
-        addCredentialsRequest.setKey("Llyods TSB");
-        addCredentialsRequest.setValue("elca1");
+        final AddCredentialsRequest addFirstCredentialsRequest = new AddCredentialsRequest(key, value);
+        final AddCredentialsRequest addSecondCredentialsRequest = new AddCredentialsRequest(key.concat("2"), value.concat("2"));
 
-        boolean success = safeService.addCredentials(addCredentialsRequest, email);
+        boolean success1 = safeService.addCredentials(addFirstCredentialsRequest, email);
+        boolean success2 = safeService.addCredentials(addSecondCredentialsRequest, email);
 
         final Safe safe = safeService.getSafe(email);
 
-        assertTrue(success);
-        assertEquals("Llyods TSB", safe.getCredentials().get(0).getKey());
+        assertTrue(success1);
+        assertTrue(success2);
+        assertEquals(2, safe.getCredentials().size());
+        assertEquals(addFirstCredentialsRequest.getKey() + "." + addFirstCredentialsRequest.getValue(), safe.getCredentials().get(0));
+        assertEquals(addSecondCredentialsRequest.getKey() + "." + addSecondCredentialsRequest.getValue(), safe.getCredentials().get(1));
     }
 
     @Test
-    public void removeCredentials() {
-        final String email = "danny@live.com";
-
+    public void removeCredentialsSuccess() {
         safeService.createSafe(email);
 
-        final AddCredentialsRequest addCredentialsRequest1 = new AddCredentialsRequest();
-        addCredentialsRequest1.setKey("Llyods1 TSB");
-        addCredentialsRequest1.setValue("elca1");
+        final AddCredentialsRequest firstCredential = new AddCredentialsRequest(key, value);
 
-        final AddCredentialsRequest addCredentialsRequest2 = new AddCredentialsRequest();
-        addCredentialsRequest2.setKey("Llyods2 TSB");
-        addCredentialsRequest2.setValue("elca1");
+        final AddCredentialsRequest secondCredential = new AddCredentialsRequest("Test2", "TestPassword2");
 
-        safeService.addCredentials(addCredentialsRequest1, email);
-        safeService.addCredentials(addCredentialsRequest2, email);
+        safeService.addCredentials(firstCredential, email);
+        safeService.addCredentials(secondCredential, email);
 
-        final RemoveCredentialsRequest removeCredentialsRequest = new RemoveCredentialsRequest("Llyods1 TSB", "elca1");
+        final RemoveCredentialsRequest removeFirstCredentialRequest = new RemoveCredentialsRequest(key, value);
 
-        final boolean success  = safeService.removeCredentials(removeCredentialsRequest, email);
+        final boolean success = safeService.removeCredentials(removeFirstCredentialRequest, email);
 
         final Safe safe = safeService.getSafe(email);
 
         assertTrue(success);
         assertEquals(1, safe.getCredentials().size());
+        assertEquals(secondCredential.getKey() + "." + secondCredential.getValue(), safe.getCredentials().get(0));
     }
 }

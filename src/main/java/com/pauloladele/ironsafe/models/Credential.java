@@ -15,5 +15,4 @@ public class Credential {
         this.key = key;
         this.value = value;
     }
-
 }

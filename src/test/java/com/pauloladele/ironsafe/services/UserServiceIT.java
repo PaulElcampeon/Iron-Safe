@@ -8,21 +8,24 @@ import com.pauloladele.ironsafe.dto.CreateUserRequest;
 import com.pauloladele.ironsafe.repositories.SafeRepository;
 import com.pauloladele.ironsafe.repositories.UserRepository;
 import com.pauloladele.ironsafe.utils.JwtUtil;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
+
+@ExtendWith(SpringExtension.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @SpringBootTest(classes = {IronSafeApplication.class, SecurityConfigurer.class}, webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class UserServiceTest {
+public class UserServiceIT {
 
     @Autowired
     private UserRepository userRepository;
@@ -48,65 +51,71 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
-    @After
+    private final String email = "test@live.com";
+
+    private final String password = "testPassword";
+
+    @AfterEach
     public void tearDown() {
         userRepository.deleteAll();
         safeRepository.deleteAll();
     }
 
     @Test
-    public void createUser() {
-        CreateUserRequest createUserRequest = new CreateUserRequest("danny@live.com", "danny@live.com", "12345", "12345");
+    public void createUserSuccess() {
+        CreateUserRequest createUserRequest = new CreateUserRequest(email, email, password, password);
 
         userService.createUser(createUserRequest);
 
-        final boolean exists = userRepository.existsById("danny@live.com");
+        final boolean exists = userRepository.existsById(email);
 
         assertTrue(exists);
     }
 
     @Test
-    public void authenticateUser() throws Exception {
-        CreateUserRequest createUserRequest = new CreateUserRequest("danny@live.com", "danny@live.com", "12345", "12345");
+    public void authenticateUserSuccess() {
+        CreateUserRequest createUserRequest = new CreateUserRequest(email, email, password, password);
 
         userService.createUser(createUserRequest);
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest();
-        authenticationRequest.setEmail("danny@live.com");
-        authenticationRequest.setPassword("12345");
+        authenticationRequest.setEmail(email);
+        authenticationRequest.setPassword(password);
 
-        final AuthenticationResponse authenticationResponse = userService.authenticateUser(authenticationRequest);
+        final AuthenticationResponse authenticationResponse;
 
-        assertNotNull(authenticationResponse.getJwt());
-        assertNotNull(authenticationResponse.getSafe());
+        try {
+            authenticationResponse = userService.authenticateUser(authenticationRequest);
+            assertNotNull(authenticationResponse.getJwt());
+            assertNotNull(authenticationResponse.getSafe());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 
-    @Test(expected = InternalAuthenticationServiceException.class)
-    public void authenticateUserException() throws Exception {
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest();
-        authenticationRequest.setEmail("danny@live.com");
-        authenticationRequest.setPassword("12345");
+    @Test
+    public void authenticateUserException() {
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest(email, password);
 
-        final AuthenticationResponse authenticationResponse = userService.authenticateUser(authenticationRequest);
-
-        assertNotNull(authenticationResponse.getJwt());
-        assertNotNull(authenticationResponse.getSafe());
+        assertThrows(InternalAuthenticationServiceException.class, () ->
+                userService.authenticateUser(authenticationRequest)
+        );
     }
 
     @Test
     public void checkIfEmailExistsTrue() {
-        CreateUserRequest createUserRequest = new CreateUserRequest("danny@live.com", "danny@live.com", "12345", "12345");
+        CreateUserRequest createUserRequest = new CreateUserRequest(email, email, password, password);
 
         userService.createUser(createUserRequest);
 
-        final boolean exists = userService.checkIfEmailExists("danny@live.com");
+        final boolean exists = userService.checkIfEmailExists(email);
 
         assertTrue(exists);
     }
 
     @Test
     public void checkIfEmailExistsFalse() {
-        final boolean exists = userService.checkIfEmailExists("danny@live.com");
+        final boolean exists = userService.checkIfEmailExists(email);
 
         assertFalse(exists);
     }

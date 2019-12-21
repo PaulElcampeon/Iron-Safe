@@ -13,7 +13,7 @@ public class Safe {
 
     @Id
     private String email;
-    private List<Credential> credentials = new ArrayList<>();
+    private List<String> credentials = new ArrayList<>();
 
     public Safe() {}
 
