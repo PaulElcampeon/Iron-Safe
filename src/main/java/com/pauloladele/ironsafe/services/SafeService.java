@@ -3,7 +3,6 @@ package com.pauloladele.ironsafe.services;
 import com.mongodb.client.result.UpdateResult;
 import com.pauloladele.ironsafe.dto.AddCredentialsRequest;
 import com.pauloladele.ironsafe.dto.RemoveCredentialsRequest;
-import com.pauloladele.ironsafe.models.Credential;
 import com.pauloladele.ironsafe.models.Safe;
 import com.pauloladele.ironsafe.repositories.SafeRepository;
 import com.pauloladele.ironsafe.utils.StringEncrypterDecrypter;
@@ -14,10 +13,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
