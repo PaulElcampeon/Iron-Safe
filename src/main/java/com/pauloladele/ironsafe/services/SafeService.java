@@ -79,18 +79,4 @@ public class SafeService implements SafeInterface {
 
         return updateResult.getModifiedCount() == 1;
     }
-
-//    @Override
-//    public boolean removeCredentials(RemoveCredentialsRequest removeCredentialsMessage, String email) {
-//        Query query = new Query();
-//        query.addCriteria(Criteria.where("_id").is(email)
-//                .and("credentials.key").is(removeCredentialsMessage.getKey()));
-//
-//        Update update = new Update();
-//        update.pull("credentials", new Credential(removeCredentialsMessage.getKey(), removeCredentialsMessage.getValue()));
-//
-//        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Safe.class);
-//
-//        return updateResult.getModifiedCount() == 1;
-//    }
 }
