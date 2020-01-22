@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ import java.util.function.Function;
 @Service
 public class JwtUtil {
 
-    @Qualifier("secretKey")
+    @Value("secretKey")
     private String SECRET_KEY;
 
 
