@@ -9,6 +9,7 @@ public class ViewResource {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String homePage() {
-        return "index";
+        System.out.println("hii");
+        return "index.html";
     }
 }
