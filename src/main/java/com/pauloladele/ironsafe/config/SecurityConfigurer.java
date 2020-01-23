@@ -1,6 +1,7 @@
 package com.pauloladele.ironsafe.config;
 
 import com.pauloladele.ironsafe.filters.JwtRequestFilter;
+import com.pauloladele.ironsafe.filters.SimpleFilter;
 import com.pauloladele.ironsafe.services.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,9 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
+    @Autowired
+    private SimpleFilter simpleFilter;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth
@@ -33,13 +37,14 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .authorizeRequests().antMatchers("/", "/js/**","/css/**","/user/create", "/user/authenticate").permitAll()
+                .authorizeRequests().antMatchers("/","/js/**","/css/**","/user/create", "/user/authenticate").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(simpleFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
